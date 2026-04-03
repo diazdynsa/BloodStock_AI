@@ -5,39 +5,32 @@ import joblib
 import os
 
 # 1. Load data
-path_data = 'dataset/permintaan_darah_per_bulan_berdasarkan_komponen_darah.csv' 
+path_data = 'dataset/permintaan_darah_per_bulan_berdasarkan_komponen_darah.csv'
 
 if not os.path.exists(path_data):
     print(f"Error: File {path_data} tidak ditemukan!")
 else:
     df = pd.read_csv(path_data)
-
-    # 2. Filtering Data 
+    # Ambil komponen PRC saja
     df_prc = df[df['komponen_darah'] == 'PRC'].copy()
 
-    # 3. Menentukan Fitur (X) dan Target (y)
+    # 2. Fitur (X) dan Target (y)
     X = df_prc[['tahun', 'kode_bulan']]
     y = df_prc['jumlah']
 
-    # 4. Melatih Model
+    # 3. Latih Model
     model = LinearRegression()
     model.fit(X, y)
 
-    # 5. Evaluasi Model
+    # 4. Evaluasi
     y_pred = model.predict(X)
-    mae = mean_absolute_error(y, y_pred)
-    mse = mean_squared_error(y, y_pred)
-    r2 = r2_score(y, y_pred)
-
     print("=== HASIL EVALUASI MODEL ===")
-    print(f"Mean Absolute Error (MAE) : {mae:.2f}")
-    print(f"Mean Squared Error (MSE)  : {mse:.2f}")
-    print(f"R2 Score (Akurasi)        : {r2:.4f}")
-    print("============================")
+    print(f"MAE : {mean_absolute_error(y, y_pred):.2f}")
+    print(f"MSE : {mean_squared_error(y, y_pred):.2f}")
+    print(f"R2  : {r2_score(y, y_pred):.4f}")
 
-   
+    # 5. Simpan Model
     if not os.path.exists('model'):
         os.makedirs('model')
-    
     joblib.dump(model, 'model/model_darah.pkl')
-    print("Model berhasil disimpan di 'model/model_darah.pkl'")
+    print("Model disimpan di model/model_darah.pkl")

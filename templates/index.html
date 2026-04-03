@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediksi Stok Darah PRC - Regresi Linear</title>
+    <title>BloodStock AI - Prediksi Stok Darah PRC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -38,16 +38,16 @@
             <div class="col-lg-4">
                 <div class="card shadow-sm p-4 h-100">
                     <h4 class="mb-3">Input Prediksi</h4>
-                    <p class="text-muted small">Masukkan data tahun dan bulan untuk memprediksi stok darah PRC di Kota Tasikmalaya.</p>
+                    <p class="text-muted small">Masukkan data tahun dan bulan untuk memprediksi stok darah PRC Kota Tasikmalaya.</p>
                     <hr>
                     <form action="/predict" method="POST">
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Tahun</label>
-                            <input type="number" name="tahun" class="form-control" placeholder="Contoh: 2023" required value="{{ tahun if tahun }}">
+                            <input type="number" name="tahun" class="form-control" placeholder="Contoh: 2026" required value="{{ tahun if tahun }}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Bulan (1-12)</label>
-                            <input type="number" name="bulan" class="form-control" min="1" max="12" placeholder="1 = Januari" required value="{{ bulan if bulan }}">
+                            <input type="number" name="bulan" class="form-control" min="1" max="12" placeholder="1 = Jan" required value="{{ bulan if bulan }}">
                         </div>
                         <button type="submit" class="btn btn-predict w-100 py-2 mt-2">Hitung Estimasi</button>
                     </form>
@@ -58,9 +58,8 @@
                         <div class="d-flex flex-wrap gap-2 mt-2">
                             <span class="badge bg-secondary metrics-badge">R2: 0.0259</span>
                             <span class="badge bg-info text-dark metrics-badge">MAE: 102.95</span>
-                            <span class="badge bg-dark metrics-badge">MSE: 14500.2</span>
                         </div>
-                        <p class="text-muted x-small mt-2" style="font-size: 0.75rem;">*Data dievaluasi menggunakan Linear Regression.</p>
+                        <p class="text-muted mt-2" style="font-size: 0.75rem;">*Data dievaluasi menggunakan Linear Regression.</p>
                     </div>
                     {% endif %}
                 </div>
@@ -86,10 +85,10 @@
                     <div class="text-center">
                         <h6 class="fw-bold mb-3 text-start">Visualisasi Tren & Garis Regresi:</h6>
                         <img src="data:image/png;base64,{{ plot_url }}" class="img-fluid rounded border shadow-sm" alt="Grafik Regresi">
-                    </div>
-
-                    <div class="mt-4">
-                        <p class="small text-muted italic">** Catatan: Grafik di atas menunjukkan perbandingan antara data asli (merah) dan pola yang ditangkap oleh garis regresi linear (biru).</p>
+                        <p class="small text-muted mt-3">
+                            * Titik <span class="text-primary fw-bold">Biru</span>: Data Aktual | 
+                            Garis <span class="text-danger fw-bold">Merah</span>: Garis Regresi (Tren)
+                        </p>
                     </div>
                 </div>
                 {% endif %}
@@ -98,18 +97,11 @@
         </div>
 
         <div class="row mt-4">
-            <div class="col-12">
-                <div class="card shadow-sm p-4">
-                    <h5>Tentang Studi Kasus</h5>
-                    <p class="text-muted mb-0">Aplikasi ini mengimplementasikan algoritma <strong>Linear Regression</strong> menggunakan library Scikit-Learn untuk memprediksi stok komponen darah PRC. Dataset bersumber dari <strong>Open Data Kota Tasikmalaya</strong> yang mencakup data historis permintaan darah bulanan.</p>
-                </div>
+            <div class="col-12 text-center text-muted">
+                <hr>
+                <small>&copy; 2026 - Tugas 3 Regresi Linear - Teknik Informatika</small>
             </div>
         </div>
     </div>
-
-    <footer class="text-center py-4 text-muted">
-        <small>&copy; 2026 - Tugas 3 Regresi Linear - Teknik Informatika</small>
-    </footer>
-
 </body>
 </html>
