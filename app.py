@@ -5,37 +5,49 @@ import pandas as pd
 import io
 import base64
 import matplotlib
-matplotlib.use('Agg') # Biar gak error pas di server/Vercel
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 
 app = Flask(__name__)
 
-# Load model
+# 1. Load Model (Pastikan file .pkl sudah ada di folder model)
 model_path = 'model/model_darah.pkl'
-model = joblib.load(model_path) if os.path.exists(model_path) else None
+if os.path.exists(model_path):
+    model = joblib.load(model_path)
+else:
+    model = None
 
-def generate_plot(X, y, model):
-    plt.figure(figsize=(8, 4))
-    
-    # Engineer sumbu X kronologis (asumsi data mulai 2021)
-    X_viz = X.copy()
-    X_viz['index_waktu'] = (X_viz['tahun'] - 2021) * 12 + X_viz['kode_bulan']
+def generate_plot(df_prc, model_multiple):
+    # Buat urutan waktu kronologis (1, 2, 3... 48)
+    # Ini supaya sumbu X memanjang ke samping, bukan numpuk 1-12
+    x_kronologis = (df_prc['tahun'] - df_prc['tahun'].min()) * 12 + df_prc['kode_bulan']
+    y_aktual = df_prc['jumlah']
 
-    # 1. Plot Data Aktual (Titik Biru)
-    plt.scatter(X_viz['index_waktu'], y, color='blue', label='Data Aktual', s=30)
+    plt.figure(figsize=(9, 5))
     
-    # 2. Plot Garis Regresi (Garis Merah)
-    y_pred = model.predict(X)
-    plt.plot(X_viz['index_waktu'], y_pred, color='red', linewidth=2, label='Garis Regresi')
+    # 1. Plot Titik Biru (Data Aktual)
+    plt.scatter(x_kronologis, y_aktual, color='blue', label='Data Aktual', s=30, alpha=0.7)
     
-    plt.title('Analisis Regresi Linear: Tren Permintaan Darah PRC')
-    plt.xlabel('Urutan Waktu (Bulan ke-n)')
-    plt.ylabel('Jumlah Kantong')
-    plt.legend()
+    # 2. Plot Garis Merah (Tren Lurus)
+    # Kita buat model simple khusus buat visualisasi biar garisnya GAK ZIG-ZAG
+    model_simple = LinearRegression()
+    X_simple = x_kronologis.values.reshape(-1, 1)
+    model_simple.fit(X_simple, y_aktual)
+    y_trend = model_simple.predict(X_simple)
+    
+    plt.plot(x_kronologis, y_trend, color='red', linewidth=2.5, label='Garis Regresi (Tren)')
+    
+    # Styling biar formal buat Jurnal
+    plt.title('Analisis Regresi Linear: Tren Permintaan Darah PRC', fontsize=12, pad=15)
+    plt.xlabel('Urutan Waktu (Bulan ke-n)', fontsize=10)
+    plt.ylabel('Jumlah Kantong', fontsize=10)
+    plt.legend(loc='upper right')
     plt.grid(True, linestyle='--', alpha=0.4)
     
+    # Simpan ke Base64
     img = io.BytesIO()
-    plt.savefig(img, format='png', bbox_inches='tight')
+    plt.savefig(img, format='png', bbox_inches='tight', dpi=150)
     img.seek(0)
     plot_url = base64.b64encode(img.getvalue()).decode('utf8')
     plt.close()
@@ -47,26 +59,32 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if model is None: return "Model not found!"
+    if model is None:
+        return "Error: File model_darah.pkl tidak ditemukan di folder model!"
     
     try:
         tahun = int(request.form['tahun'])
         bulan = int(request.form['bulan'])
         
-        # Prediksi
+        # Hitung Prediksi (Pake Multiple Regression: Tahun & Bulan)
         prediksi = model.predict([[tahun, bulan]])
-        hasil = round(prediksi[0])
+        hasil = int(round(prediksi[0]))
         
-        # Data untuk grafik
-        df = pd.read_csv('dataset/permintaan_darah_per_bulan_berdasarkan_komponen_darah.csv')
-        df_prc = df[df['komponen_darah'] == 'PRC'].copy()
-        plot_url = generate_plot(df_prc[['tahun', 'kode_bulan']], df_prc['jumlah'], model)
+        # Load data buat bikin grafik
+        csv_path = 'dataset/permintaan_darah_per_bulan_berdasarkan_komponen_darah.csv'
+        df = pd.read_csv(csv_path)
+        df_prc = df[df['komponen_darah'] == 'PRC'].sort_values(['tahun', 'kode_bulan'])
+        
+        # Generate Grafik
+        plot_url = generate_plot(df_prc, model)
         
         return render_template('index.html', 
                              prediction_text=f'Estimasi Stok Darah: {hasil} Kantong',
-                             plot_url=plot_url, tahun=tahun, bulan=bulan)
+                             plot_url=plot_url, 
+                             tahun=tahun, 
+                             bulan=bulan)
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Terjadi kesalahan: {str(e)}"
 
 if __name__ == '__main__':
     app.run(debug=True)
