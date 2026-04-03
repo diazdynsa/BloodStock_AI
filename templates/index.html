@@ -43,7 +43,7 @@
                     <form action="/predict" method="POST">
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Tahun</label>
-                            <input type="number" name="tahun" class="form-control" placeholder="Contoh: 2026" required value="{{ tahun if tahun }}">
+                            <input type="number" name="tahun" class="form-control" placeholder="Contoh: 2024" required value="{{ tahun if tahun }}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Bulan (1-12)</label>
@@ -58,7 +58,7 @@
                         <div class="d-flex flex-wrap gap-2 mt-1">
                             <span class="badge bg-secondary metrics-badge">R2: 0.0259</span>
                             <span class="badge bg-info text-dark metrics-badge">MAE: 102.95</span>
-                            <span class="badge bg-warning text-dark metrics-badge">MSE: 14500.2</span>
+                            <span class="badge bg-warning text-dark metrics-badge">MSE: 16028.46</span>
                         </div>
                         <p class="text-muted mt-3" style="font-size: 0.75rem; line-height: 1.4;">
                             * Model dievaluasi menggunakan <strong>Multiple Linear Regression</strong> (Tahun & Bulan).
